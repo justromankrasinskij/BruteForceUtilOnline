@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Панель управления</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f4f6f9;
+      color: #333;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      color: #34495e;
+      border-bottom: 2px solid #ecf0f1;
+      padding-bottom: 8px;
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      margin: 15px 0 10px 0;
+      color: #2c3e50;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+      color: #666;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.95rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-top: 5px;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    button.btn-attack {
+      background-color: #e74c3c;
+    }
+
+    button.btn-attack:hover {
+      background-color: #c0392b;
+    }
+
+    button.btn-info {
+      background-color: #2ecc71;
+    }
+
+    button.btn-info:hover {
+      background-color: #27ae60;
+    }
+
+    .full-width {
+      grid-column: span 2;
+    }
+
+    #output {
+      background: #1e1e1e;
+      color: #00ff66;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: 'Courier New', Courier, monospace;
+      white-space: pre-wrap;
+      max-height: 350px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+
+    .inline-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .inline-group input[type="number"] {
+      width: 80px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Панель управления</h1>
+
+  <div class="container">
+
+    <div class="card">
+      <h2>Регистрация пользователя</h2>
+      <div class="form-group">
+        <label>Логин:</label>
+        <input type="text" id="regLogin" placeholder="target_user">
+      </div>
+      <div class="form-group">
+        <label>Пароль:</label>
+        <input type="password" id="regPassword" placeholder="secret123">
+      </div>
+      <div class="form-group">
+        <label>Имя:</label>
+        <input type="text" id="regFirstName" placeholder="Иван">
+      </div>
+      <div class="form-group">
+        <label>Фамилия:</label>
+        <input type="text" id="regLastName" placeholder="Иванов">
+      </div>
+      <button onclick="registerUser()">Зарегистрировать</button>
+    </div>
+
+    <div class="card">
+      <h2>Проверка входа</h2>
+      <div class="form-group">
+        <label>Логин:</label>
+        <input type="text" id="loginUsername" placeholder="target_user">
+      </div>
+      <div class="form-group">
+        <label>Пароль:</label>
+        <input type="password" id="loginPassword" placeholder="secret123">
+      </div>
+      <button onclick="loginUser()">Войти</button>
+
+      <h2 style="margin-top: 20px;">Информация о пользователях</h2>
+      <button class="btn-info" onclick="getAllUsers()">Все пользователи</button>
+      <div class="form-group inline-group" style="margin-top: 10px;">
+        <input type="number" id="userId" placeholder="ID">
+        <button class="btn-info" onclick="getUserById()">По ID</button>
+      </div>
+      <div class="form-group inline-group">
+        <input type="text" id="userSearchLogin" placeholder="Логин">
+        <button class="btn-info" onclick="getUserByLogin()">По логину</button>
+      </div>
+    </div>
+
+    <div class="card full-width">
+      <h2>Запуск атаки по словарям (.txt)</h2>
+      <div class="form-group inline-group">
+        <button class="btn-attack" onclick="attackLogin()">Подбор логина (logins.txt)</button>
+      </div>
+      <div class="form-group inline-group">
+        <input type="text" id="attackTargetLogin" placeholder="Логин для атаки">
+        <button class="btn-attack" onclick="attackPassword()">Подбор пароля (passwords.txt)</button>
+      </div>
+
+      <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+      <h2>Генерация в реальном времени</h2>
+
+      <div class="form-group inline-group">
+        <input type="number" id="genLoginMinLen" value="8" min="1" max="16" title="Мин. длина">
+        <input type="number" id="genLoginMaxLen" value="16" min="1" max="16" title="Макс. длина">
+        <button class="btn-attack" onclick="attackGenerateLogin()">Генерация и подбор логина</button>
+      </div>
+
+      <div class="form-group inline-group">
+        <input type="text" id="genTargetLogin" placeholder="Логин целевого пользователя">
+        <input type="number" id="genPassMinLen" value="8" min="1" max="16" title="Мин. длина">
+        <input type="number" id="genPassMaxLen" value="16" min="1" max="16" title="Макс. длина">
+        <button class="btn-attack" onclick="attackGeneratePassword()">Генерация и подбор пароля</button>
+      </div>
+    </div>
+
+    <div class="card full-width">
+      <h2>Результат / Ответ сервера</h2>
+      <div id="output">Готов к работе...</div>
+    </div>
+
+  </div>
+
+  <script>
+    const output = document.getElementById('output');
+
+    function printOutput(data) {
+      if (typeof data === 'object') {
+        output.innerText = JSON.stringify(data, null, 2);
+      } else {
+        output.innerText = data;
+      }
+    }
+
+    async function registerUser() {
+      const user = {
+        login: document.getElementById('regLogin').value,
+        password: document.getElementById('regPassword').value,
+        firstName: document.getElementById('regFirstName').value,
+        lastName: document.getElementById('regLastName').value
+      };
+
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(user)
+        });
+        const data = await res.json();
+        printOutput(data);
+      } catch (e) {
+        printOutput("Ошибка: " + e.message);
+      }
+    }
+
+    async function loginUser() {
+      const login = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        const res = await fetch(`/api/login?login=${encodeURIComponent(login)}&password=${encodeURIComponent(password)}`, {
+          method: 'POST'
+        });
+        const data = await res.text();
+        printOutput(data);
+      } catch (e) {
+        printOutput("Ошибка: " + e.message);
+      }
+    }
+
+    async function getAllUsers() {
+      try {
+        const res = await fetch('/api/users');
+        const data = await res.json();
+        printOutput(data);
+      } catch (e) {
+        printOutput("Ошибка: " + e.message);
+      }
+    }
+
+    async function getUserById() {
+      const id = document.getElementById('userId').value;
+      if (!id) return alert("Введите ID");
+
+      try {
+        const res = await fetch(`/api/users/${id}`);
+        if (res.status === 404) {
+          printOutput("Пользователь не найден (404)");
+          return;
+        }
+        const data = await res.json();
+        printOutput(data);
+      } catch (e) {
+        printOutput("Ошибка: " + e.message);
+      }
+    }
+
+    async function getUserByLogin() {
+      const login = document.getElementById('userSearchLogin').value;
+      if (!login) return alert("Введите логин");
+
+      try {
+        const res = await fetch(`/api/users/search?login=${encodeURIComponent(login)}`);
+        if (res.status === 404) {
+          printOutput("Пользователь не найден (404)");
+          return;
+        }
+        const data = await res.json();
+        printOutput(data);
+      } catch (e) {
+        printOutput("Ошибка: " + e.message);
+      }
+    }
+
+    async function attackLogin() {
+      printOutput("Идет подбор логина по файлу...");
+      try {
+        const res = await fetch('/api/attack/login');
+        const data = await res.text();
+        printOutput(data);
+      } catch (e) {
+        printOutput("Ошибка: " + e.message);
+      }
+    }
+
+    async function attackPassword() {
+      const targetLogin = document.getElementById('attackTargetLogin').value;
+      if (!targetLogin) return alert("Укажите логин для подбора пароля");
+
+      printOutput(`Идет подбор пароля по файлу для '${targetLogin}'...`);
+      try {
+        const res = await fetch(`/api/attack/password?login=${encodeURIComponent(targetLogin)}`);
+        const data = await res.text();
+        printOutput(data);
+      } catch (e) {
+        printOutput("Ошибка: " + e.message);
+      }
+    }
+
+    async function attackGenerateLogin() {
+      const minLen = document.getElementById('genLoginMinLen').value || 8;
+      const maxLen = document.getElementById('genLoginMaxLen').value || 16;
+
+      printOutput(`Запущена генерация логинов (длина от ${minLen} до ${maxLen} символов)...`);
+      try {
+        const res = await fetch(`/api/attack/generate/login?minLength=${minLen}&maxLength=${maxLen}`);
+        const data = await res.text();
+        printOutput(data);
+      } catch (e) {
+        printOutput("Ошибка: " + e.message);
+      }
+    }
+
+    async function attackGeneratePassword() {
+      const targetLogin = document.getElementById('genTargetLogin').value;
+      const minLen = document.getElementById('genPassMinLen').value || 8;
+      const maxLen = document.getElementById('genPassMaxLen').value || 16;
+
+      if (!targetLogin) return alert("Укажите логин для генерации и подбора пароля");
+
+      printOutput(`Запущена генерация паролей для '${targetLogin}' (длина от ${minLen} до ${maxLen} символов)...`);
+      try {
+        const res = await fetch(`/api/attack/generate/password?login=${encodeURIComponent(targetLogin)}&minLength=${minLen}&maxLength=${maxLen}`);
+        const data = await res.text();
+        printOutput(data);
+      } catch (e) {
+        printOutput("Ошибка: " + e.message);
+      }
+    }
+  </script>
+</body>
+
+</html>
